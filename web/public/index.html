@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <script type="text/javascript" src="smoothie.js"></script>
+
+
+</head>
+
+<body>
+<div id="sse">
+    <a href="javascript:WebSocketTest()">Run WebSocket</a>
+    <canvas id="mycanvas" width="400" height="100"></canvas>
+</div>
+
+
+<script type="text/javascript">
+
+        var line1 = new TimeSeries();
+
+         function WebSocketTest()
+         {
+            if ("WebSocket" in window)
+            {
+               //alert("WebSocket is supported by your Browser!");
+               // Let us open a web socket
+               var ws = new WebSocket("ws://akosslgstorage.no-ip.org:3000");
+
+               ws.onopen = function()
+               {
+                  // Web Socket is connected, send data using send()
+                  //ws.send("Message to send");
+                  //alert("Message is sent...");
+               };
+
+               ws.onmessage = function (evt)
+               {
+                  var data = JSON.parse(evt.data);
+                  var dataInner = JSON.parse(data.utf8Data);
+
+                  line1.append(new Date().getTime(), parseFloat(dataInner.axis_x.replace(',', '.')));
+                  //document.getElementById('placeholder').innerHTML = received_msg;
+                  //alert("Message is received...");
+               };
+
+               ws.onclose = function()
+               {
+                  // websocket is closed.
+                  //alert("Connection is closed...");
+               };
+
+            }
+            else
+
+            {
+               // The browser doesn't support WebSocket
+               alert("WebSocket NOT supported by your Browser!");
+            }
+         }
+
+        var smoothie = new SmoothieChart({ grid: { strokeStyle: 'rgb(125, 0, 0)', fillStyle: 'rgb(60, 0, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+        smoothie.addTimeSeries(line1, { strokeStyle: 'rgb(0, 255, 0)', fillStyle: 'rgba(0, 255, 0, 0.4)', lineWidth: 3 });
+        //smoothie.addTimeSeries(line2, { strokeStyle: 'rgb(255, 0, 255)', fillStyle: 'rgba(255, 0, 255, 0.3)', lineWidth: 3 });
+
+        smoothie.streamTo(document.getElementById("mycanvas"), 1000);
+      </script>
+
+
+</body>
+
+</html>
