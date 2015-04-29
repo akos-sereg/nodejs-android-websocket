@@ -12,20 +12,26 @@ var wsServer = new WebSocketServer({
     httpServer: server
 });
 
-var index = 0;
 wsServer.on('request', function(request) {
     var connection = request.accept(null, request.origin);
-    
-    if (index > 0) {
-	clients.push(connection);
-    }
+    var clientIndex = clients.push(connection) - 1;
+    var remoteAddress = connection.remoteAddress;
+    console.log('Client connected from address ' + remoteAddress);
 
-    index++;
+    // Message received from a client
     connection.on('message', function(message) {
-	console.log('message recv.: ' + JSON.stringify(message));
-	for (var i=0; i!=clients.length; i++) {
-	    console.log('deliver...');
-	    clients[i].send(JSON.stringify(message));
-	}
+    	console.log('Message Received: ' + JSON.stringify(message));
+        console.log('Delivering to clients (' + clients.length + ')');
+
+        // Broadcast the message
+    	for (var i=0; i!=clients.length; i++) {
+    	    clients[i].send(JSON.stringify(message));
+    	}
+    });
+
+    // Client disconnects, removing from list
+    connection.on('close', function(connection) {
+        console.log('Peer ' + remoteAddress + ' disconnected.');
+        clients.splice(clientIndex, 1);
     });
 });
