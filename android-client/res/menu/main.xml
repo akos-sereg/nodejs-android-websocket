@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.obdtracking.MainActivity" >
+    tools:context="com.github.akossereg.websocket.MainActivity" >
 
     <item
         android:id="@+id/action_settings"

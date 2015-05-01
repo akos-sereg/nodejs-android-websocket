@@ -1,10 +1,9 @@
-package com.example.obdtracking;
+package com.github.akossereg.websocket;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.Locale;
-
 import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketException;
 import de.tavendo.autobahn.WebSocketHandler;
@@ -38,7 +37,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     
     private void start() {
 
-        final String wsuri = "ws://akosslgstorage.no-ip.org:3000";
+        final String wsuri = "ws://192.168.1.100:3000";
 
         try {
            mConnection.connect(wsuri, new WebSocketHandler() {
@@ -70,9 +69,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (event.sensor.getType() != Sensor.TYPE_GYROSCOPE)
             return;
 		
-		TextView textview = (TextView)this.findViewById(R.id.textView1);
-		TextView textview2 = (TextView)this.findViewById(R.id.textView2);
-		TextView textview3 = (TextView)this.findViewById(R.id.textView3);
+		TextView textview = (TextView)this.findViewById(R.id.axis_x);
+		TextView textview2 = (TextView)this.findViewById(R.id.axis_y);
+		TextView textview3 = (TextView)this.findViewById(R.id.axis_z);
 		TextView console = (TextView)this.findViewById(R.id.console);
 		
 		float axisX = event.values[0];
