@@ -2,34 +2,24 @@ package com.github.akossereg.websocket;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URI;
-import java.util.Locale;
-import de.tavendo.autobahn.WebSocketConnection;
-import de.tavendo.autobahn.WebSocketException;
-import de.tavendo.autobahn.WebSocketHandler;
+
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.util.Log;
-import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.TextView;
+import de.tavendo.autobahn.WebSocketConnection;
+import de.tavendo.autobahn.WebSocketException;
+import de.tavendo.autobahn.WebSocketHandler;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
 	private SensorManager sm;
-	private WindowManager mWindowManager;
     private long lastSendTime;
     
     private static final String TAG = "de.tavendo.test1";
@@ -69,18 +59,18 @@ public class MainActivity extends Activity implements SensorEventListener {
 		if (event.sensor.getType() != Sensor.TYPE_GYROSCOPE)
             return;
 		
-		TextView textview = (TextView)this.findViewById(R.id.axis_x);
-		TextView textview2 = (TextView)this.findViewById(R.id.axis_y);
-		TextView textview3 = (TextView)this.findViewById(R.id.axis_z);
+		TextView axisXtextbox = (TextView)this.findViewById(R.id.axis_x);
+		TextView axisYtextbox = (TextView)this.findViewById(R.id.axis_y);
+		TextView axisZtextbox = (TextView)this.findViewById(R.id.axis_z);
 		TextView console = (TextView)this.findViewById(R.id.console);
 		
 		float axisX = event.values[0];
 	    float axisY = event.values[1];
 	    float axisZ = event.values[2];
         
-        textview.setText(String.valueOf(axisX));
-        textview2.setText(String.valueOf(axisY));
-        textview3.setText(String.valueOf(axisZ));
+	    axisXtextbox.setText(String.valueOf(axisX));
+	    axisYtextbox.setText(String.valueOf(axisY));
+	    axisZtextbox.setText(String.valueOf(axisZ));
         
         long millisec = 1000;
         
@@ -97,15 +87,10 @@ public class MainActivity extends Activity implements SensorEventListener {
         		StringWriter sw = new StringWriter();
         		PrintWriter pw = new PrintWriter(sw);
         		err.printStackTrace(pw);
-        		
         		console.setText("SendMessage Ex: " + event.timestamp + ", " + err.getClass().toString() + ", " + sw.toString());
         	}
         	
         	lastSendTime = event.timestamp;
-        	//console.setText("SendMessage: " + event.timestamp);
-        }
-        else {
-        	//console.setText("TS: " + event.timestamp);
         }
 	}
 
@@ -121,25 +106,18 @@ public class MainActivity extends Activity implements SensorEventListener {
 			sm.registerListener(this, s, SensorManager.SENSOR_DELAY_NORMAL);
 		}
 		
-		// Get an instance of the WindowManager
-        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        
         // Start WebSocket client
         this.start();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
 			return true;
@@ -151,8 +129,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	protected void onResume() {
 		super.onResume();
 
-		if (sm.getSensorList(Sensor.TYPE_ACCELEROMETER).size() != 0) {
-			Sensor s = sm.getSensorList(Sensor.TYPE_ACCELEROMETER).get(0);
+		if (sm.getSensorList(Sensor.TYPE_GYROSCOPE).size() != 0) {
+			Sensor s = sm.getSensorList(Sensor.TYPE_GYROSCOPE).get(0);
 			sm.registerListener(this, s, SensorManager.SENSOR_DELAY_NORMAL);
 		}
 	}
@@ -162,78 +140,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 		sm.unregisterListener(this);
 		super.onStop();
-	}
-
-	/**
-	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-	 * one of the sections/tabs/pages.
-	 */
-	public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-		public SectionsPagerAdapter(FragmentManager fm) {
-			super(fm);
-		}
-
-		@Override
-		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a PlaceholderFragment (defined as a static inner class
-			// below).
-			return PlaceholderFragment.newInstance(position + 1);
-		}
-
-		@Override
-		public int getCount() {
-			// Show 3 total pages.
-			return 3;
-		}
-
-		@Override
-		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return getString(R.string.title_section1).toUpperCase(l);
-			case 1:
-				return getString(R.string.title_section2).toUpperCase(l);
-			case 2:
-				return getString(R.string.title_section3).toUpperCase(l);
-			}
-			return null;
-		}
-	}
-
-	/**
-	 * A placeholder fragment containing a simple view.
-	 */
-	public static class PlaceholderFragment extends Fragment {
-		/**
-		 * The fragment argument representing the section number for this
-		 * fragment.
-		 */
-		private static final String ARG_SECTION_NUMBER = "section_number";
-
-		/**
-		 * Returns a new instance of this fragment for the given section number.
-		 */
-		public static PlaceholderFragment newInstance(int sectionNumber) {
-			PlaceholderFragment fragment = new PlaceholderFragment();
-			Bundle args = new Bundle();
-			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-			fragment.setArguments(args);
-			return fragment;
-		}
-
-		public PlaceholderFragment() {
-		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_main, container,
-					false);
-			return rootView;
-		}
 	}
 
 	@Override
