@@ -8,41 +8,153 @@
 <canvas id="chart" width="400" height="100"></canvas>
 <br/>
 <a href="javascript:ConnectToWs()">Connect ...</a>
+<a href="javascript:ResetBoard()">Reset Board</a>
+
+
+<br/><br/>
+<div id="board" style="width: 1200px; height: 660px; background: #eeeeee; padding: 10px; border: solid 1px #888888; overflow-x: hidden;">
+  <div id="ball" style="position: relative; top: 0; left: 0;"><img src="soccer_ball.png"/></div>
+  <div id="box" style="position: absolute; top: 800px; left: 20px; width: 100px; height: 12px; border: solid 1px #000000; background: #cccccc;"></div>
+</div>
 
 <script type="text/javascript">
 
-        var series = new TimeSeries();
+    var series = new TimeSeries();
 
-         function ConnectToWs()
+     // Board properties
+    // ----------------------------------------------
+    var MAX_HEIGHT_OF_BOARD = 620;
+    var MAX_WIDTH_OF_BOARD = 1150;
+
+    // Ball properties
+    // ----------------------------------------------
+    var ballSpeed = 15;                   // Speed of Ball if moving
+    var ballDirection = [ 0.5, 0.5 ];     // Current direction of Ball
+    var ballPosition = [ 0, 0 ];          // Current position of Ball
+    var ballStopped = true;
+
+    // Slider properties
+    // ----------------------------------------------
+    var SLIDER_WIDTH = 100;
+    var SLIDER_ACCEPTABLE_THRESHOLD = 20;
+    var speed = 0;                        // Current speed of slider
+    var sliderLeftPosition = 20;
+
+    /** 
+     * Starts moving ball.
+     */
+    function moveBall() {
+      var ball = document.getElementById('ball');
+
+      ballPosition[0] += ballDirection[0] * ballSpeed;
+      ballPosition[1] += ballDirection[1] * ballSpeed;
+
+      ball.style.left = ballPosition[0] + 'px';
+      ball.style.top = ballPosition[1] + 'px';
+
+      checkBallBoundaries();
+
+      // Prepare next iteration of moving
+      if (!ballStopped) {
+        setTimeout(function() { moveBall(); }, 50);
+      }
+    }
+
+    /** 
+     * Check ball's position: changes ball's direction if it hits the edge.
+     */
+    function checkBallBoundaries() {
+      if (ballPosition[0] > MAX_WIDTH_OF_BOARD) { ballDirection[0] = -ballDirection[0]; ballPosition[0] = MAX_WIDTH_OF_BOARD; }
+      if (ballPosition[1] > MAX_HEIGHT_OF_BOARD) { 
+        // Check if slider covers the ball
+        if (ballPosition[0] < sliderLeftPosition - SLIDER_ACCEPTABLE_THRESHOLD) FailGame();
+        if (ballPosition[0] > sliderLeftPosition + SLIDER_WIDTH + SLIDER_ACCEPTABLE_THRESHOLD) FailGame();
+
+        ballDirection[1] = -ballDirection[1]; ballPosition[1] = MAX_HEIGHT_OF_BOARD; 
+      }
+      if (ballPosition[0] < 0) { ballDirection[0] = -ballDirection[0]; ballPosition[0] = 0; }
+      if (ballPosition[1] < 0) { ballDirection[1] = -ballDirection[1]; ballPosition[1] = 0; }
+    }
+
+    /** 
+     * Starts moving slider.
+     */
+    function moveSlider() {
+        var MAX_LEFT = 1200 - 200 - 10;
+        var MIN_LEFT = 10;
+
+        var box = document.getElementById('box');
+        sliderLeftPosition += speed;
+
+        if (sliderLeftPosition > MAX_LEFT) sliderLeftPosition = MAX_LEFT;
+        if (sliderLeftPosition < MIN_LEFT) sliderLeftPosition = MIN_LEFT;
+
+        box.style.position = 'absolute';
+        box.style.left = sliderLeftPosition + 'px';
+
+        setTimeout(function() { moveSlider(); }, 50);
+    }
+
+    function ResetBoard() {
+      ballSpeed = 15;
+      ballDirection = [ 0.5, 0.5 ];
+      ballPosition = [ 0, 0 ]; 
+      ballStopped = false;
+      moveBall();
+      document.getElementById('board').style.backgroundColor = '#eeeeee';
+    }
+
+    function FailGame() {
+      ballStopped = true;
+      document.getElementById('board').style.backgroundColor = '#660000';
+
+      alert('Ball position: ' + ballPosition[0] + ', Slider Position: ' + sliderLeftPosition);
+    }
+
+   function ConnectToWs()
+   {
+      ballStopped = false;
+
+      moveSlider();
+      moveBall();
+
+      if ("WebSocket" in window)
+      {
+         var ws = new WebSocket("ws://192.168.1.100:3000");
+
+         ws.onopen = function()
          {
-            if ("WebSocket" in window)
-            {
-               var ws = new WebSocket("ws://192.168.1.100:3000");
+         };
 
-               ws.onopen = function()
-               {
-               };
+         ws.onmessage = function (evt)
+         {
+            var data = JSON.parse(JSON.parse(evt.data).utf8Data);
 
-               ws.onmessage = function (evt)
-               {
-                  var data = JSON.parse(JSON.parse(evt.data).utf8Data);
-                  series.append(new Date().getTime(), parseFloat(data.axis_x.replace(',', '.')));
-               };
+            var axisX = parseFloat(data.axis_x.replace(',', '.'));
+            var axisY = parseFloat(data.axis_y.replace(',', '.'));
+            var axisZ = parseFloat(data.axis_z.replace(',', '.'));
 
-               ws.onclose = function()
-               {
-               };
+            if (axisZ < -0.2) speed = 40;
+            else if (axisZ > 0.2) speed = -40;
+            else speed = 0;
 
-            }
-            else
-            {
-               alert("WebSocket NOT supported by your Browser!");
-            }
-         }
+            series.append(new Date().getTime(), axisZ);
+         };
 
-        var smoothie = new SmoothieChart({ grid: { strokeStyle: 'rgb(125, 0, 0)', fillStyle: 'rgb(60, 0, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
-        smoothie.addTimeSeries(series, { strokeStyle: 'rgb(0, 255, 0)', fillStyle: 'rgba(0, 255, 0, 0.4)', lineWidth: 3 });
-        smoothie.streamTo(document.getElementById("chart"), 1000);
-      </script>
+         ws.onclose = function()
+         {
+         };
+
+      }
+      else
+      {
+         alert("WebSocket NOT supported by your Browser!");
+      }
+   }
+
+  var smoothie = new SmoothieChart({ grid: { strokeStyle: 'rgb(0, 125, 0)', fillStyle: 'rgb(ö, 60, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+  smoothie.addTimeSeries(series, { strokeStyle: 'rgb(0, 255, 0)', fillStyle: 'rgba(0, 255, 0, 0.4)', lineWidth: 3 });
+  smoothie.streamTo(document.getElementById("chart"), 1000);
+</script>
 </body>
 </html>
