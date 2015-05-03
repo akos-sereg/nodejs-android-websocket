@@ -18,3 +18,5 @@ This lightweight project consists of
 
 Open http://<your hostname>:3005/index.html in browser
 Launch the android application, and start shaking your phone. You should see the live-updating chart changing on the website.
+
+![Screenshot](https://raw.githubusercontent.com/akos-sereg/nodejs-android-websocket/master/web/screenshots/screenshot.png "Screenshot")
