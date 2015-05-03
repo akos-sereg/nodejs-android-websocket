@@ -2,35 +2,95 @@
 <html>
 <head>
     <script type="text/javascript" src="smoothie.js"></script>
+    <style>
+    
+    body {
+      font-family: Tahoma;
+      font-size: 9pt;
+      padding: 30px;
+    }
+
+
+    .notConnected {
+      background-color: #aaaaaa;
+      border-radius: 5px;
+      color: #ffffff;
+      font-family: Tahoma;
+      font-size: 9pt;
+      width: 120px;
+      padding: 4px;
+      text-align: center;
+    }
+
+    .connected {
+      background-color: #34C400;
+      border-radius: 5px;
+      color: #ffffff;
+      font-family: Tahoma;
+      font-size: 9pt;
+      width: 150px;
+      padding: 4px;
+      text-align: center;
+    }
+
+    .disconnected {
+      background-color: #FF2421;
+      border-radius: 5px; 
+      color: #000000;
+      font-family: Tahoma;
+      font-size: 9pt;
+      width: 120px;
+      padding: 4px;
+      text-align: center;
+    }
+
+    </style>
 </head>
 
 <body>
 <canvas id="chart" width="400" height="100"></canvas>
 <br/>
-<a href="javascript:ConnectToWs()">Connect ...</a>
+URI: <input type="etxt" id="uri" value="ws://192.168.1.100:3000" />
+<input type="button" onClick="javascript:ConnectToWs()" value="Connect"/>
+<input type="button" onClick="javascript:ws.close()" value="Disconnect"/>
+
+<p>
+Connection Status: <div id="connectionStatus" class="notConnected">Not Connected</div>
+</p>
 
 <script type="text/javascript">
 
         var series = new TimeSeries();
+        var ws;
+        var messageCount = 0;
 
          function ConnectToWs()
          {
             if ("WebSocket" in window)
             {
-               var ws = new WebSocket("ws://192.168.1.100:3000");
+               ws = new WebSocket(document.getElementById('uri').value);
 
                ws.onopen = function()
                {
+                  document.getElementById('connectionStatus').className = 'connected';
+                  document.getElementById('connectionStatus').innerHTML = 'Connected';
+                  messageCount = 0;
                };
 
                ws.onmessage = function (evt)
                {
                   var data = JSON.parse(JSON.parse(evt.data).utf8Data);
                   series.append(new Date().getTime(), parseFloat(data.axis_x.replace(',', '.')));
+
+                  messageCount++;
+                  document.getElementById('connectionStatus').className = 'connected';
+                  document.getElementById('connectionStatus').innerHTML = messageCount + ' messages received';
                };
 
                ws.onclose = function()
                {
+                  document.getElementById('connectionStatus').className = 'disconnected';
+                  document.getElementById('connectionStatus').innerHTML = 'Disconnected';
                };
 
             }
@@ -40,7 +100,7 @@
             }
          }
 
-        var smoothie = new SmoothieChart({ grid: { strokeStyle: 'rgb(125, 0, 0)', fillStyle: 'rgb(60, 0, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+        var smoothie = new SmoothieChart({ grid: { strokeStyle: 'rgb(0, 125, 0)', fillStyle: 'rgb(0, 60, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
         smoothie.addTimeSeries(series, { strokeStyle: 'rgb(0, 255, 0)', fillStyle: 'rgba(0, 255, 0, 0.4)', lineWidth: 3 });
         smoothie.streamTo(document.getElementById("chart"), 1000);
       </script>
