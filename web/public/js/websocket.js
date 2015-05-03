@@ -2,32 +2,42 @@ var PingSquashWebsocketClient = function(url, slider, series) {
   this.url = url;
   this.slider = slider;
   this.series = series;
+  this.ws = null;
+  this.messageCount = 0;
 }
 
 PingSquashWebsocketClient.prototype.connect = function() {
 
-  var ws = new WebSocket(this.url);
+  this.ws = new WebSocket(this.url);
 
-  ws.onopen = function()
+  this.ws.onopen = function()
   {
+    document.getElementById('connectionStatus').className = 'connected';
+    document.getElementById('connectionStatus').innerHTML = 'Connected';
   };
 
-  ws.onmessage = function (evt)
+  this.ws.onmessage = function (evt)
   {
+    this.messageCount++;
+    document.getElementById('connectionStatus').className = 'connected';
+    document.getElementById('connectionStatus').innerHTML = this.messageCount + ' messages received';
+
     var data = JSON.parse(JSON.parse(evt.data).utf8Data);
 
     var axisX = parseFloat(data.axis_x.replace(',', '.'));
     var axisY = parseFloat(data.axis_y.replace(',', '.'));
     var axisZ = parseFloat(data.axis_z.replace(',', '.'));
 
-    if (axisZ < -0.2) slider.speed = 40;
-    else if (axisZ > 0.2) slider.speed = -40;
+    if (axisZ < -0.3) slider.speed = 40;
+    else if (axisZ > 0.3) slider.speed = -40;
     else slider.speed = 0;
 
     series.append(new Date().getTime(), axisZ);
   };
 
-  ws.onclose = function()
+  this.ws.onclose = function()
   {
+    document.getElementById('connectionStatus').className = 'disconnected';
+    document.getElementById('connectionStatus').innerHTML = 'Disconnected';
   };
 };

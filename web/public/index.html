@@ -6,26 +6,70 @@
     <script type="text/javascript" src="js/slider.js"></script>
     <script type="text/javascript" src="js/board.js"></script>
     <script type="text/javascript" src="js/websocket.js"></script>
+
+    <style>
+    
+      body {
+        font-family: Tahoma;
+        font-size: 9pt;
+      }
+      .notConnected {
+        background-color: #aaaaaa;
+        border-radius: 5px;
+        color: #ffffff;
+        font-family: Tahoma;
+        font-size: 9pt;
+        width: 120px;
+        padding: 4px;
+        text-align: center;
+      }
+      .connected {
+        background-color: #34C400;
+        border-radius: 5px;
+        color: #ffffff;
+        font-family: Tahoma;
+        font-size: 9pt;
+        width: 150px;
+        padding: 4px;
+        text-align: center;
+      }
+      .disconnected {
+        background-color: #FF2421;
+        border-radius: 5px; 
+        color: #000000;
+        font-family: Tahoma;
+        font-size: 9pt;
+        width: 120px;
+        padding: 4px;
+        text-align: center;
+      }
+    </style>
+
 </head>
 
 <body>
-<canvas id="chart" width="400" height="100"></canvas>
+<canvas id="chart" width="800" height="100"></canvas>
 <br/>
+<br/>
+URI: <input type="etxt" id="uri" value="ws://akosslgstorage.no-ip.org:3000" />
 <input id="connectButton" type="button" onClick="javascript:wsClient.connect()" value="Connect"/> &nbsp;
 <input id="newGameButton" type="button" onClick="javascript:board.resetBoard()" value="New Game"/>
 
+<p>
+Connection Status: <div id="connectionStatus" class="notConnected">Not Connected</div>
+</p>
 
 <br/><br/>
-<div id="board" style="width: 1200px; height: 660px; background: #eeeeee; padding: 10px; border: solid 1px #888888; overflow-x: hidden;">
+<div id="board" style="width: 1200px; height: 560px; background: #eeeeee; padding: 10px; border: solid 1px #888888; overflow-x: hidden;">
+  <div id="slider" style="border-radius: 4px; position: relative; top: 800px; left: 20px; width: 100px; height: 12px; border: solid 1px #000000; background: #cccccc;"></div>
   <div id="ball" style="position: relative; top: 0; left: 0;"><img src="soccer_ball.png"/></div>
-  <div id="slider" style="border-radius: 4px; position: absolute; top: 800px; left: 20px; width: 100px; height: 12px; border: solid 1px #000000; background: #cccccc;"></div>
 </div>
 
 <script type="text/javascript">
 
   // Initialize live update chart
   var series = new TimeSeries();
-  var smoothie = new SmoothieChart({ grid: { strokeStyle: 'rgb(0, 125, 0)', fillStyle: 'rgb(ö, 60, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
+  var smoothie = new SmoothieChart({ grid: { strokeStyle: 'rgb(0, 125, 0)', fillStyle: 'rgb(0, 60, 0)', lineWidth: 1, millisPerLine: 250, verticalSections: 6 } });
   smoothie.addTimeSeries(series, { strokeStyle: 'rgb(0, 255, 0)', fillStyle: 'rgba(0, 255, 0, 0.4)', lineWidth: 3 });
   smoothie.streamTo(document.getElementById("chart"), 1000);
 

@@ -2,7 +2,7 @@ var Board = function(ball, slider) {
   this.ball = ball;
   this.slider = slider;
 
-  this.MAX_HEIGHT_OF_BOARD = 620;
+  this.MAX_HEIGHT_OF_BOARD = 510;
   this.MAX_WIDTH_OF_BOARD = 1150;
 
   // Allow user to control slider with keyboard (left, down, right arrows)

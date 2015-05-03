@@ -1,6 +1,6 @@
 var Slider = function() {
   this.SLIDER_WIDTH = 100;
-  this.SLIDER_ACCEPTABLE_THRESHOLD = 20;
+  this.SLIDER_ACCEPTABLE_THRESHOLD = 30;
   this.speed = 0;
   this.leftPosition = 20;
 }
