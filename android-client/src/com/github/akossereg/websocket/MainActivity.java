@@ -81,7 +81,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             //Log.i("OrientationTestActivity", String.format("Orientation: %f, %f, %f", mOrientation[0], mOrientation[1], mOrientation[2]));
         }
 		
-		if (event.sensor.getType() != Sensor.TYPE_GYROSCOPE && mLastAccelerometerSet && mLastMagnetometerSet) {
+		if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE && mLastAccelerometerSet && mLastMagnetometerSet) {
 			
 			TextView axisXtextbox = (TextView)this.findViewById(R.id.axis_x);
 			TextView axisYtextbox = (TextView)this.findViewById(R.id.axis_y);

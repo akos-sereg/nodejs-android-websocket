@@ -48,11 +48,12 @@
 </head>
 
 <body>
+Motion Signum function <select onChange="changeDataProviders(parseInt(this.value))"><option value='1'>Accelerometer (sliding)</option><option value='2' SELECTED>Orientation (rotating)</option></select><br/><br/>
 <canvas id="chart" width="800" height="100"></canvas>
 <br/>
 <br/>
 URI: <input type="text" id="uri" size="60" value="ws://akosslgstorage.no-ip.org:3000" />
-<input id="connectButton" type="button" onClick="javascript:wsClient.connect()" value="Connect"/> &nbsp;
+<input id="connectButton" type="button" onClick="javascript:wsClient.connect()" value="Connect"/>
 <input id="newGameButton" type="button" onClick="javascript:board.resetBoard()" value="New Game"/>
 
 <p>
@@ -87,6 +88,16 @@ Connection Status: <div id="connectionStatus" class="notConnected">Not Connected
   // (if WS is connected), or using arrow keys on keyboard.
   slider.moveSlider();  
 
+  function changeDataProviders(selectedValue) {
+    switch(selectedValue) {
+      case 1:
+        wsClient.sensorHandler = new AccelerometerSensorHandler();
+        break;
+      case 2:
+        wsClient.sensorHandler = new OrientationSensorHandler();
+        break;
+    }
+  }
 
 </script>
 </body>
