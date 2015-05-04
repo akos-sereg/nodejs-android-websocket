@@ -22,15 +22,25 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private SensorManager sm;
     private long lastSendTime;
     
+    private Sensor mAccelerometer;
+    private Sensor mMagnetometer;
+    private float[] mOrientation = new float[3];
+    private float[] mLastAccelerometer = new float[3];
+    private float[] mLastMagnetometer = new float[3];
+    private boolean mLastAccelerometerSet = false;
+    private boolean mLastMagnetometerSet = false;
+    private float[] mR = new float[9];
+    
     private static final String TAG = "de.tavendo.test1";
-    private final WebSocketConnection mConnection = new WebSocketConnection();
+    private WebSocketConnection mConnection;
     
     private void start() {
 
-        final String wsuri = "ws://192.168.1.100:3000";
+        final String wsuri = "ws://akosslgstorage.no-ip.org:3000";
 
         try {
-           mConnection.connect(wsuri, new WebSocketHandler() {
+        	mConnection = new WebSocketConnection();
+        	mConnection.connect(wsuri, new WebSocketHandler() {
 
               @Override
               public void onOpen() {
@@ -56,42 +66,57 @@ public class MainActivity extends Activity implements SensorEventListener {
 
 	@Override
 	public void onSensorChanged(SensorEvent event) {
-		if (event.sensor.getType() != Sensor.TYPE_GYROSCOPE)
-            return;
 		
-		TextView axisXtextbox = (TextView)this.findViewById(R.id.axis_x);
-		TextView axisYtextbox = (TextView)this.findViewById(R.id.axis_y);
-		TextView axisZtextbox = (TextView)this.findViewById(R.id.axis_z);
-		TextView console = (TextView)this.findViewById(R.id.console);
+		if (event.sensor == mAccelerometer) {
+            System.arraycopy(event.values, 0, mLastAccelerometer, 0, event.values.length);
+            mLastAccelerometerSet = true;
+        } else if (event.sensor == mMagnetometer) {
+            System.arraycopy(event.values, 0, mLastMagnetometer, 0, event.values.length);
+            mLastMagnetometerSet = true;
+        }
 		
-		float axisX = event.values[0];
-	    float axisY = event.values[1];
-	    float axisZ = event.values[2];
-        
-	    axisXtextbox.setText(String.valueOf(axisX));
-	    axisYtextbox.setText(String.valueOf(axisY));
-	    axisZtextbox.setText(String.valueOf(axisZ));
-        
-        long millisec = 1000;
-        
-        if (lastSendTime == 0) {
-        	lastSendTime = event.timestamp;
+        if (mLastAccelerometerSet && mLastMagnetometerSet) {
+            SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer);
+            SensorManager.getOrientation(mR, mOrientation);
+            //Log.i("OrientationTestActivity", String.format("Orientation: %f, %f, %f", mOrientation[0], mOrientation[1], mOrientation[2]));
         }
-        
-        if ((event.timestamp - lastSendTime) > (100*millisec)) {
-        	
-        	try {
-        		this.mConnection.sendTextMessage(String.format("{ \"axis_x\": \"%f\", \"axis_y\": \"%f\", \"axis_z\": \"%f\" }", axisX, axisY, axisZ));
-        	}
-        	catch (Exception err) {
-        		StringWriter sw = new StringWriter();
-        		PrintWriter pw = new PrintWriter(sw);
-        		err.printStackTrace(pw);
-        		console.setText("SendMessage Ex: " + event.timestamp + ", " + err.getClass().toString() + ", " + sw.toString());
-        	}
-        	
-        	lastSendTime = event.timestamp;
-        }
+		
+		if (event.sensor.getType() != Sensor.TYPE_GYROSCOPE && mLastAccelerometerSet && mLastMagnetometerSet) {
+			
+			TextView axisXtextbox = (TextView)this.findViewById(R.id.axis_x);
+			TextView axisYtextbox = (TextView)this.findViewById(R.id.axis_y);
+			TextView axisZtextbox = (TextView)this.findViewById(R.id.axis_z);
+			TextView console = (TextView)this.findViewById(R.id.console);
+			
+			float axisX = event.values[0];
+		    float axisY = event.values[1];
+		    float axisZ = event.values[2];
+	        
+		    axisXtextbox.setText(String.valueOf(mOrientation[0]));
+		    axisYtextbox.setText(String.valueOf(mOrientation[1]));
+		    axisZtextbox.setText(String.valueOf(mOrientation[2]));
+	        
+	        long millisec = 200; // Expect messages to be sent in every "millisec" interval
+	        
+	        if (lastSendTime == 0) {
+	        	lastSendTime = event.timestamp;
+	        }
+	        
+	        if ((event.timestamp - lastSendTime) > (100*millisec) && mConnection != null && mConnection.isConnected()) {
+	        	try {
+	        		this.mConnection.sendTextMessage(String.format("{ \"axis_x\": \"%f\", \"axis_y\": \"%f\", \"axis_z\": \"%f\", \"orientation_x\": \"%f\", \"orientation_y\": \"%f\", \"orientation_z\": \"%f\"  }", 
+	        				axisX, axisY, axisZ, mOrientation[0], mOrientation[1], mOrientation[2]));
+	        	}
+	        	catch (Exception err) {
+	        		StringWriter sw = new StringWriter();
+	        		PrintWriter pw = new PrintWriter(sw);
+	        		err.printStackTrace(pw);
+	        		console.setText("SendMessage Ex: " + event.timestamp + ", " + err.getClass().toString() + ", " + sw.toString());
+	        	}
+	        	
+	        	lastSendTime = event.timestamp;
+	        }
+		}
 	}
 
 	@Override
@@ -105,6 +130,9 @@ public class MainActivity extends Activity implements SensorEventListener {
 			Sensor s = sm.getSensorList(Sensor.TYPE_GYROSCOPE).get(0);
 			sm.registerListener(this, s, SensorManager.SENSOR_DELAY_NORMAL);
 		}
+		
+		mAccelerometer = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mMagnetometer = sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 		
         // Start WebSocket client
         this.start();
@@ -120,7 +148,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
-			return true;
+			mConnection = null;
+			this.start();
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -133,13 +162,23 @@ public class MainActivity extends Activity implements SensorEventListener {
 			Sensor s = sm.getSensorList(Sensor.TYPE_GYROSCOPE).get(0);
 			sm.registerListener(this, s, SensorManager.SENSOR_DELAY_NORMAL);
 		}
+		
+		mLastAccelerometerSet = false;
+        mLastMagnetometerSet = false;
+        sm.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sm.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+    
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
 	}
 
 	@Override
 	protected void onPause() {
-
-		sm.unregisterListener(this);
-		super.onStop();
+		super.onPause();
+        sm.unregisterListener(this);
 	}
 
 	@Override

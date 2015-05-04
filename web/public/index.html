@@ -51,7 +51,7 @@
 <canvas id="chart" width="800" height="100"></canvas>
 <br/>
 <br/>
-URI: <input type="etxt" id="uri" value="ws://akosslgstorage.no-ip.org:3000" />
+URI: <input type="text" id="uri" size="60" value="ws://akosslgstorage.no-ip.org:3000" />
 <input id="connectButton" type="button" onClick="javascript:wsClient.connect()" value="Connect"/> &nbsp;
 <input id="newGameButton" type="button" onClick="javascript:board.resetBoard()" value="New Game"/>
 
@@ -77,7 +77,7 @@ Connection Status: <div id="connectionStatus" class="notConnected">Not Connected
   var slider = new Slider();
   var ball = new Ball(slider);
   var board = new Board(ball, slider);
-  var wsClient = new PingSquashWebsocketClient('ws://192.168.1.100:3000', slider, series);
+  var wsClient = new PingSquashWebsocketClient(document.getElementById('uri').value, slider, series);
 
   // Ball has to know about the boundaries (board's boundaries), and slider (position).
   ball.board = board;
