@@ -49,8 +49,13 @@ Ball.prototype.checkBallBoundaries = function() {
 }
 
 Ball.prototype.reset = function() {
+  this.setImage('normal');
   this.speed = 1;
   this.direction = [ 0.5, 0.5 ];
   this.position = [ 0, 0 ];
   this.stopped = false;
+}
+
+Ball.prototype.setImage = function(type) {
+  document.getElementById('ballImage').src = 'ball-'+type+'.gif';
 }

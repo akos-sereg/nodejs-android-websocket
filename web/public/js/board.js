@@ -19,6 +19,5 @@ Board.prototype.resetBoard = function() {
 
 Board.prototype.failGame = function() {
   this.ball.stopped = true;
-  this.getView().style.backgroundColor = '#FF8787';
-  alert('Ball position: ' + this.ball.position[0] + ', Slider Position: ' + this.slider.leftPosition);
+  this.ball.setImage('fail');
 }

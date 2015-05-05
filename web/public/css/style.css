@@ -1,0 +1,37 @@
+body {
+  font-family: Tahoma;
+  font-size: 9pt;
+}
+
+.notConnected {
+  background-color: #aaaaaa;
+  border-radius: 5px;
+  color: #ffffff;
+  font-family: Tahoma;
+  font-size: 9pt;
+  width: 120px;
+  padding: 4px;
+  text-align: center;
+}
+
+.connected {
+  background-color: #34C400;
+  border-radius: 5px;
+  color: #ffffff;
+  font-family: Tahoma;
+  font-size: 9pt;
+  width: 150px;
+  padding: 4px;
+  text-align: center;
+}
+
+.disconnected {
+  background-color: #FF2421;
+  border-radius: 5px; 
+  color: #000000;
+  font-family: Tahoma;
+  font-size: 9pt;
+  width: 120px;
+  padding: 4px;
+  text-align: center;
+}

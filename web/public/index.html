@@ -6,49 +6,15 @@
     <script type="text/javascript" src="js/slider.js"></script>
     <script type="text/javascript" src="js/board.js"></script>
     <script type="text/javascript" src="js/websocket.js"></script>
-
-    <style>
-    
-      body {
-        font-family: Tahoma;
-        font-size: 9pt;
-      }
-      .notConnected {
-        background-color: #aaaaaa;
-        border-radius: 5px;
-        color: #ffffff;
-        font-family: Tahoma;
-        font-size: 9pt;
-        width: 120px;
-        padding: 4px;
-        text-align: center;
-      }
-      .connected {
-        background-color: #34C400;
-        border-radius: 5px;
-        color: #ffffff;
-        font-family: Tahoma;
-        font-size: 9pt;
-        width: 150px;
-        padding: 4px;
-        text-align: center;
-      }
-      .disconnected {
-        background-color: #FF2421;
-        border-radius: 5px; 
-        color: #000000;
-        font-family: Tahoma;
-        font-size: 9pt;
-        width: 120px;
-        padding: 4px;
-        text-align: center;
-      }
-    </style>
-
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
 <body>
-Motion Signum function: <select onChange="wsClient.changeDataProvider(parseInt(this.value))"><option value='1'>Gyroscope (sliding phone on horizontal axis)</option><option value='2' SELECTED>Orientation (rotating phone)</option></select><br/><br/>
+Motion Signum function: 
+<select onChange="wsClient.changeDataProvider(parseInt(this.value))">
+    <option value='1'>Gyroscope (sliding phone on horizontal axis)</option>
+    <option value='2' SELECTED>Orientation (rotating phone)</option>
+</select><br/><br/>
 Live data stream from your phone:<br/><br/>
 <canvas id="chart" width="1200" height="100"></canvas>
 <br/>
@@ -61,7 +27,7 @@ URI: <input type="text" id="uri" size="60" value="ws://akosslgstorage.no-ip.org:
 <br/><br/>
 <div id="board" style="width: 1200px; height: 560px; background: #F4F3E5; padding: 2px; border: solid 1px #888888; overflow-x: hidden;">
   <div id="slider" style="border-radius: 6px; position: relative; top: 540px; left: 0px; width: 140px; height: 12px; border: solid 1px #000000; background: #aaaaaa;"></div>
-  <div id="ball" style="position: relative; top: -16px; left: 0px;"><img src="soccer_ball.png"/></div>
+  <div id="ball" style="position: relative; top: -16px; left: 0px;"><img id="ballImage" src="ball-normal.gif"/></div>
 </div>
 
 <script type="text/javascript">
