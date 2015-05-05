@@ -1,4 +1,5 @@
 var Ball = function() {
+  this.BALL_SIZE = 32;
   this.reset();
   this.board = null;
   this.slider = null;
@@ -22,7 +23,7 @@ Ball.prototype.moveBall = function() {
 
   // Prepare next iteration of moving
   if (!this.stopped) {
-    setTimeout('ball.moveBall()', 50);
+    setTimeout('ball.moveBall()', 1);
   }
 }
 
@@ -33,14 +34,14 @@ Ball.prototype.checkBallBoundaries = function() {
     return;
   }
 
-  if (this.position[0] > board.MAX_WIDTH_OF_BOARD) { this.direction[0] = -this.direction[0]; this.position[0] = board.MAX_WIDTH_OF_BOARD; }
-  if (this.position[1] > board.MAX_HEIGHT_OF_BOARD) { 
+  if (this.position[0] > this.board.MAX_WIDTH_OF_BOARD - this.BALL_SIZE) { this.direction[0] = -this.direction[0]; this.position[0] = board.MAX_WIDTH_OF_BOARD - this.BALL_SIZE; }
+  if (this.position[1] > this.board.MAX_HEIGHT_OF_BOARD - this.slider.SLIDER_HEIGHT) { 
     // Check if slider covers the ball
     if (this.position[0] < this.slider.leftPosition - this.slider.SLIDER_ACCEPTABLE_THRESHOLD) this.board.failGame();
     if (this.position[0] > this.slider.leftPosition + this.slider.SLIDER_WIDTH + this.slider.SLIDER_ACCEPTABLE_THRESHOLD) this.board.failGame();
 
     this.direction[1] = -this.direction[1]; 
-    this.position[1] = this.board.MAX_HEIGHT_OF_BOARD; 
+    this.position[1] = this.board.MAX_HEIGHT_OF_BOARD - this.slider.SLIDER_HEIGHT; 
   }
 
   if (this.position[0] < 0) { this.direction[0] = -this.direction[0]; this.position[0] = 0; }
@@ -48,7 +49,7 @@ Ball.prototype.checkBallBoundaries = function() {
 }
 
 Ball.prototype.reset = function() {
-  this.speed = 15;
+  this.speed = 1;
   this.direction = [ 0.5, 0.5 ];
   this.position = [ 0, 0 ];
   this.stopped = false;

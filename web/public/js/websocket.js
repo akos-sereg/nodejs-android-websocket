@@ -26,19 +26,11 @@ PingSquashWebsocketClient.prototype.connect = function() {
     document.getElementById('connectionStatus').innerHTML = wsClient.messageCount + ' messages received';
 
     var data = JSON.parse(JSON.parse(evt.data).utf8Data);
+    var gyroscope = [ parseFloat(data.axis_x.replace(',', '.')), parseFloat(data.axis_y.replace(',', '.')), parseFloat(data.axis_z.replace(',', '.')) ];
+    var orientation = [ parseFloat(data.orientation_x.replace(',', '.')), parseFloat(data.orientation_y.replace(',', '.')), parseFloat(data.orientation_z.replace(',', '.')) ];
 
-    // Extract acceleration data
-    var axisX = parseFloat(data.axis_x.replace(',', '.'));
-    var axisY = parseFloat(data.axis_y.replace(',', '.'));
-    var axisZ = parseFloat(data.axis_z.replace(',', '.'));
-    
-    // Extract orientation data
-    var orientationX = parseFloat(data.orientation_x.replace(',', '.'));
-    var orientationY = parseFloat(data.orientation_y.replace(',', '.'));
-    var orientationZ = parseFloat(data.orientation_z.replace(',', '.'));
-
-    slider.speed = wsClient.sensorHandler.getMotionSignum(axisZ, orientationY);
-    series.append(new Date().getTime(), wsClient.sensorHandler.getChartData(axisZ, orientationY));
+    slider.speed = wsClient.sensorHandler.getMotionSignum(gyroscope[2], orientation[1]);
+    series.append(new Date().getTime(), wsClient.sensorHandler.getChartData(gyroscope[2], orientation[1]));
   };
 
   this.ws.onclose = function()
@@ -48,29 +40,43 @@ PingSquashWebsocketClient.prototype.connect = function() {
   };
 };
 
-// Data providers
-var OrientationSensorHandler = function() {
-}
 
-OrientationSensorHandler.prototype.getChartData = function(accelerationZ, orientationY) {
+PingSquashWebsocketClient.prototype.changeDataProvider = function(dataProviderType) {
+    switch(dataProviderType) {
+      case 1:
+        this.sensorHandler = new GyroscopeSensorHandler();
+        break;
+      case 2:
+        this.sensorHandler = new OrientationSensorHandler();
+        break;
+    }
+  }
+
+// Sensor Handlers
+// -------------------------------------------------------------------------------------
+
+// Orientation
+var OrientationSensorHandler = function() { }
+
+OrientationSensorHandler.prototype.getChartData = function(gyroscopeZ, orientationY) {
   return orientationY;
 }
 
-OrientationSensorHandler.prototype.getMotionSignum = function(accelerationZ, orientationY) {
-  if (orientationY < -0.2) return -40;
-  else if (orientationY > 0.2) return 40;
+OrientationSensorHandler.prototype.getMotionSignum = function(gyroscopeZ, orientationY) {
+  if (orientationY < -0.2) return -slider.DEFAULT_SPEED;
+  else if (orientationY > 0.2) return slider.DEFAULT_SPEED;
   else return 0;
 }
 
-var AccelerometerSensorHandler = function() {
+// Gyroscope
+var GyroscopeSensorHandler = function() {}
+
+GyroscopeSensorHandler.prototype.getChartData = function(gyroscopeZ, orientationY) {
+  return gyroscopeZ;
 }
 
-AccelerometerSensorHandler.prototype.getChartData = function(accelerationZ, orientationY) {
-  return accelerationZ;
-}
-
-AccelerometerSensorHandler.prototype.getMotionSignum = function(accelerationZ, orientationY) {
-  if (accelerationZ < -0.3) return 40;
-  else if (accelerationZ > 0.3) return -40;
+GyroscopeSensorHandler.prototype.getMotionSignum = function(gyroscopeZ, orientationY) {
+  if (gyroscopeZ < -0.3) return slider.DEFAULT_SPEED;
+  else if (gyroscopeZ > 0.3) return -slider.DEFAULT_SPEED;
   else return 0;
 }

@@ -3,25 +3,7 @@ var Board = function(ball, slider) {
   this.slider = slider;
 
   this.MAX_HEIGHT_OF_BOARD = 510;
-  this.MAX_WIDTH_OF_BOARD = 1150;
-
-  // Allow user to control slider with keyboard (left, down, right arrows)
-  document.onkeydown = function(evt) {
-    evt = evt || window.event;
-    switch (evt.keyCode) {
-        // Left arrow
-        case 37:
-            slider.speed = -40;
-            break;
-        // Right arrow
-        case 39:
-            slider.speed = 40;
-            break;
-        case 40:
-            slider.speed = 0;
-            break;
-    }
-  };
+  this.MAX_WIDTH_OF_BOARD = 1190;
 }
 
 Board.prototype.getView = function() {
@@ -32,7 +14,7 @@ Board.prototype.resetBoard = function() {
   this.ball.reset();
   this.ball.stopped = false;
   this.ball.moveBall();
-  this.getView().style.backgroundColor = '#eeeeee';
+  this.getView().style.backgroundColor = '#F4F3E5';
 }
 
 Board.prototype.failGame = function() {

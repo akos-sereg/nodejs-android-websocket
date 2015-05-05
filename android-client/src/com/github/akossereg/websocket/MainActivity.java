@@ -78,7 +78,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         if (mLastAccelerometerSet && mLastMagnetometerSet) {
             SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer);
             SensorManager.getOrientation(mR, mOrientation);
-            //Log.i("OrientationTestActivity", String.format("Orientation: %f, %f, %f", mOrientation[0], mOrientation[1], mOrientation[2]));
         }
 		
 		if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE && mLastAccelerometerSet && mLastMagnetometerSet) {
@@ -96,7 +95,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 		    axisYtextbox.setText(String.valueOf(mOrientation[1]));
 		    axisZtextbox.setText(String.valueOf(mOrientation[2]));
 	        
-	        long millisec = 200; // Expect messages to be sent in every "millisec" interval
+	        long millisec = 100; // Expect messages to be sent in every "millisec" interval
 	        
 	        if (lastSendTime == 0) {
 	        	lastSendTime = event.timestamp;

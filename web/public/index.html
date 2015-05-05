@@ -48,22 +48,20 @@
 </head>
 
 <body>
-Motion Signum function <select onChange="changeDataProviders(parseInt(this.value))"><option value='1'>Accelerometer (sliding)</option><option value='2' SELECTED>Orientation (rotating)</option></select><br/><br/>
-<canvas id="chart" width="800" height="100"></canvas>
+Motion Signum function: <select onChange="wsClient.changeDataProvider(parseInt(this.value))"><option value='1'>Gyroscope (sliding phone on horizontal axis)</option><option value='2' SELECTED>Orientation (rotating phone)</option></select><br/><br/>
+Live data stream from your phone:<br/><br/>
+<canvas id="chart" width="1200" height="100"></canvas>
 <br/>
 <br/>
 URI: <input type="text" id="uri" size="60" value="ws://akosslgstorage.no-ip.org:3000" />
 <input id="connectButton" type="button" onClick="javascript:wsClient.connect()" value="Connect"/>
-<input id="newGameButton" type="button" onClick="javascript:board.resetBoard()" value="New Game"/>
-
-<p>
-Connection Status: <div id="connectionStatus" class="notConnected">Not Connected</div>
-</p>
+<input id="newGameButton" type="button" onClick="javascript:board.resetBoard()" value="New Game"/> 
+<span id="connectionStatus" class="notConnected">Not Connected</span>
 
 <br/><br/>
-<div id="board" style="width: 1200px; height: 560px; background: #eeeeee; padding: 10px; border: solid 1px #888888; overflow-x: hidden;">
-  <div id="slider" style="border-radius: 4px; position: relative; top: 800px; left: 20px; width: 100px; height: 12px; border: solid 1px #000000; background: #cccccc;"></div>
-  <div id="ball" style="position: relative; top: 0; left: 0;"><img src="soccer_ball.png"/></div>
+<div id="board" style="width: 1200px; height: 560px; background: #F4F3E5; padding: 2px; border: solid 1px #888888; overflow-x: hidden;">
+  <div id="slider" style="border-radius: 6px; position: relative; top: 540px; left: 0px; width: 140px; height: 12px; border: solid 1px #000000; background: #aaaaaa;"></div>
+  <div id="ball" style="position: relative; top: -16px; left: 0px;"><img src="soccer_ball.png"/></div>
 </div>
 
 <script type="text/javascript">
@@ -75,7 +73,8 @@ Connection Status: <div id="connectionStatus" class="notConnected">Not Connected
   smoothie.streamTo(document.getElementById("chart"), 1000);
 
   // Initialize game
-  var slider = new Slider();
+  var boardDimensions = { width: 1200, height: 560, padding: 2 };
+  var slider = new Slider(boardDimensions);
   var ball = new Ball(slider);
   var board = new Board(ball, slider);
   var wsClient = new PingSquashWebsocketClient(document.getElementById('uri').value, slider, series);
@@ -87,17 +86,6 @@ Connection Status: <div id="connectionStatus" class="notConnected">Not Connected
   // Start moving slider. Right now the speed is zero, so it will not move. You can make it move by shaking your mobile phone 
   // (if WS is connected), or using arrow keys on keyboard.
   slider.moveSlider();  
-
-  function changeDataProviders(selectedValue) {
-    switch(selectedValue) {
-      case 1:
-        wsClient.sensorHandler = new AccelerometerSensorHandler();
-        break;
-      case 2:
-        wsClient.sensorHandler = new OrientationSensorHandler();
-        break;
-    }
-  }
 
 </script>
 </body>
